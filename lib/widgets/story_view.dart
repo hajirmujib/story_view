@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:flutter/material.dart';
@@ -388,6 +387,12 @@ class StoryView extends StatefulWidget {
   /// provide this callback so as to enable scroll events on the list view.
   final Function(Direction?)? onVerticalSwipeComplete;
 
+  /// Callback for when a vertical swipe gesture is detected. If you do not
+  /// want to listen to such event, do not provide it. For instance,
+  /// for inline stories inside ListViews, it is preferrable to not to
+  /// provide this callback so as to enable scroll events on the list view.
+  final Function(Direction?)? onHorizontalSwipeComplete;
+
   /// Callback for when a story is currently being shown.
   final ValueChanged<StoryItem>? onStoryShow;
 
@@ -419,6 +424,7 @@ class StoryView extends StatefulWidget {
     this.repeat = false,
     this.inline = false,
     this.onVerticalSwipeComplete,
+    this.onHorizontalSwipeComplete,
     this.indicatorColor,
     this.indicatorForegroundColor,
   });
@@ -437,6 +443,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
   StreamSubscription<PlaybackState>? _playbackSubscription;
 
   VerticalDragInfo? verticalDragInfo;
+  HorizontalDragInfo? horizontalDragInfo;
 
   StoryItem? get _currentStory {
     return widget.storyItems.firstWhereOrNull((it) => !it!.shown);
@@ -707,6 +714,40 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
 
                         verticalDragInfo = null;
                       },
+                onHorizontalDragStart: widget.onHorizontalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        widget.controller.pause();
+                      },
+                onHorizontalDragCancel: widget.onHorizontalSwipeComplete == null
+                    ? null
+                    : () {
+                        widget.controller.play();
+                      },
+                onHorizontalDragUpdate: widget.onHorizontalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        if (horizontalDragInfo == null) {
+                          horizontalDragInfo = HorizontalDragInfo();
+                        }
+
+                        horizontalDragInfo!.update(details.primaryDelta!);
+
+                        // TODO: provide callback interface for animation purposes
+                      },
+                onHorizontalDragEnd: widget.onHorizontalSwipeComplete == null
+                    ? null
+                    : (details) {
+                        widget.controller.play();
+                        // finish up drag cycle
+                        if (!horizontalDragInfo!.cancel &&
+                            widget.onHorizontalSwipeComplete != null) {
+                          widget.onHorizontalSwipeComplete!(
+                              horizontalDragInfo!.direction);
+                        }
+
+                        horizontalDragInfo = null;
+                      },
               )),
           Align(
             alignment: Alignment.centerLeft,
@@ -827,11 +868,11 @@ class StoryProgressIndicator extends StatelessWidget {
         this.indicatorHeight,
       ),
       foregroundPainter: IndicatorOval(
-        this.indicatorForegroundColor?? Colors.white.withOpacity(0.8),
+        this.indicatorForegroundColor ?? Colors.white.withOpacity(0.8),
         this.value,
       ),
       painter: IndicatorOval(
-        this.indicatorColor?? Colors.white.withOpacity(0.4),
+        this.indicatorColor ?? Colors.white.withOpacity(0.4),
         1.0,
       ),
     );

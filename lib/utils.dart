@@ -23,3 +23,25 @@ class VerticalDragInfo {
     direction = tmpDirection;
   }
 }
+
+class HorizontalDragInfo {
+  bool cancel = false;
+
+  Direction? direction;
+
+  void update(double primaryDelta) {
+    Direction tmpDirection;
+
+    if (primaryDelta > 0) {
+      tmpDirection = Direction.right;
+    } else {
+      tmpDirection = Direction.left;
+    }
+
+    if (direction != null && tmpDirection != direction) {
+      cancel = true;
+    }
+
+    direction = tmpDirection;
+  }
+}
