@@ -717,29 +717,20 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 onHorizontalDragStart: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        if (_nextDebouncer?.isActive == false) {
-                          widget.controller.play();
-                        } else {
-                          widget.controller.next();
-                        }
+                        _removeNextHold();
+                        _goBack();
                       },
                 onHorizontalDragCancel: widget.onHorizontalSwipeComplete == null
                     ? null
                     : () {
-                        if (_nextDebouncer?.isActive == false) {
-                          widget.controller.play();
-                        } else {
-                          widget.controller.next();
-                        }
+                        _removeNextHold();
+                        _goBack();
                       },
                 onHorizontalDragUpdate: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        if (_nextDebouncer?.isActive == false) {
-                          widget.controller.play();
-                        } else {
-                          widget.controller.next();
-                        }
+                        _removeNextHold();
+                        _goBack();
 
                         if (horizontalDragInfo == null) {
                           horizontalDragInfo = HorizontalDragInfo();
@@ -752,11 +743,8 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 onHorizontalDragEnd: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        if (_nextDebouncer?.isActive == false) {
-                          widget.controller.play();
-                        } else {
-                          widget.controller.next();
-                        }
+                        _removeNextHold();
+                        _goBack();
 
                         // finish up drag cycle
                         if (!horizontalDragInfo!.cancel &&
