@@ -559,6 +559,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
     if (widget.onComplete != null) {
       widget.controller.pause();
       widget.onComplete!();
+      this._animationController?.forward();
     }
 
     if (widget.repeat) {
@@ -704,7 +705,6 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 onVerticalDragEnd: widget.onVerticalSwipeComplete == null
                     ? null
                     : (details) {
-                        widget.controller.play();
                         // finish up drag cycle
                         if (!verticalDragInfo!.cancel &&
                             widget.onVerticalSwipeComplete != null) {
@@ -717,17 +717,17 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 onHorizontalDragStart: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        widget.controller.previous();
+                        _beginPlay();
                       },
                 onHorizontalDragCancel: widget.onHorizontalSwipeComplete == null
                     ? null
                     : () {
-                        widget.controller.play();
+                        _beginPlay();
                       },
                 onHorizontalDragUpdate: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        widget.controller.previous();
+                        _beginPlay();
 
                         if (horizontalDragInfo == null) {
                           horizontalDragInfo = HorizontalDragInfo();
@@ -740,7 +740,7 @@ class StoryViewState extends State<StoryView> with TickerProviderStateMixin {
                 onHorizontalDragEnd: widget.onHorizontalSwipeComplete == null
                     ? null
                     : (details) {
-                        widget.controller.previous();
+                        _beginPlay();
 
                         // finish up drag cycle
                         if (!horizontalDragInfo!.cancel &&
